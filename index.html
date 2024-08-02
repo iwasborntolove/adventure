@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adventure of a Lifetime</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            font-family: 'Times New Roman', Times, serif;
+            color: #333;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            border: 2px solid #333;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        h1 {
+            font-size: 24px;
+        }
+        input[type="text"] {
+            width: 300px;
+            padding: 10px;
+            font-size: 16px;
+            border: 2px solid #333;
+            margin-bottom: 20px;
+        }
+        #response {
+            margin-top: 20px;
+            font-size: 18px;
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #e0e0e0;
+            padding: 10px;
+            border: 2px solid #333;
+            min-height: 24px; /* Ensure a consistent height */
+        }
+        .keyboard-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .keyboard-row {
+            display: flex;
+        }
+        .key {
+            width: 30px;
+            height: 30px;
+            margin: 5px;
+            border: 2px solid #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Times New Roman', Times, serif;
+            background-color: #e0e0e0;
+            color: #000;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+        .key.active {
+            background-color: #440339;
+            color: #fff;
+        }
+        #waitingMessage {
+            font-size: 18px;
+            margin-bottom: 20px;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="waitingMessage"></div>
+        <h1>Explore</h1>
+        <input type="text" id="inputBox" placeholder="Type something...">
+        <div id="response"></div>
+    </div>
+    <div class="keyboard-container" id="keyboard"></div>
+
+    <script>
+        function hashString(str) {
+            let hash = 0;
+            for (let i = 0; i < str.length; i++) {
+                const char = str.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash |= 0; // Convert to 32bit integer
+            }
+            return hash;
+        }
+
+        function generateRandomStringFromHash(hash, length) {
+            const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:",.<>?/`~';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                const randomIndex = Math.abs((hash + i) % characters.length);
+                result += characters.charAt(randomIndex);
+            }
+            return result;
+        }
+
+        function generateRandomNumber(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        const inputBox = document.getElementById('inputBox');
+        const responseDiv = document.getElementById('response');
+        const keyboardContainer = document.getElementById('keyboard');
+        const waitingMessage = document.getElementById('waitingMessage');
+
+        window.onload = function() {
+            const randomNumber = generateRandomNumber(20000, 25000);
+            waitingMessage.innerText = `You are 1 out of ${randomNumber} waiting in line...`;
+        };
+
+        inputBox.addEventListener('input', function() {
+            const input = this.value.trim().toLowerCase();
+            if (input === "") {
+                responseDiv.innerText = ""; // Display blank output when nothing is typed
+            } else {
+                const hash = hashString(input);
+                const randomResponse = generateRandomStringFromHash(hash, 20); // Adjust the length as needed
+                responseDiv.innerText = randomResponse;
+            }
+            updateKeyboard(input);
+        });
+
+        function createKeyboard() {
+            const keys = [
+                '`1234567890-=' ,
+                'qwertyuiop[]\\',
+                'asdfghjkl;\'',
+                'zxcvbnm,./',
+                '!@#$%^&*()_+'
+            ];
+            keys.forEach(row => {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'keyboard-row';
+                for (let i = 0; i < row.length; i += 1) {
+                    const keyDiv = document.createElement('div');
+                    keyDiv.className = 'key';
+                    keyDiv.innerText = row[i];
+                    keyDiv.addEventListener('mousedown', () => handleKeyPress(keyDiv));
+                    keyDiv.addEventListener('mouseup', () => handleKeyRelease(keyDiv));
+                    rowDiv.appendChild(keyDiv);
+                }
+                keyboardContainer.appendChild(rowDiv);
+            });
+        }
+
+        function handleKeyPress(keyDiv) {
+            keyDiv.classList.add('active');
+            setTimeout(() => {
+                keyDiv.classList.remove('active');
+            }, 1000); // 1 second duration
+        }
+
+        function handleKeyRelease(keyDiv) {
+            keyDiv.classList.remove('active');
+        }
+
+        function updateKeyboard(input) {
+            const keyDivs = document.querySelectorAll('.key');
+            keyDivs.forEach(keyDiv => {
+                if (input.includes(keyDiv.innerText)) {
+                    keyDiv.classList.add('active');
+                } else {
+                    keyDiv.classList.remove('active');
+                }
+            });
+        }
+
+        createKeyboard();
+    </script>
+</body>
+</html>
