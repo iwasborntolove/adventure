@@ -11,16 +11,20 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f0f0f0;
+            background-color: #440339;
             font-family: 'Times New Roman', Times, serif;
             color: #333;
             margin: 0;
+            position: relative;
+            overflow: hidden;
         }
         .container {
             text-align: center;
             border: 2px solid #333;
             padding: 20px;
             background-color: rgba(255, 255, 255, 0.8);
+            position: relative;
+            z-index: 2; /* Ensure container is above echo */
         }
         h1 {
             font-size: 24px;
@@ -31,6 +35,7 @@
             font-size: 16px;
             border: 2px solid #333;
             margin-bottom: 20px;
+            box-shadow: none; /* Remove the white box at the bottom */
         }
         #response {
             margin-top: 20px;
@@ -46,6 +51,7 @@
             flex-direction: column;
             align-items: center;
             margin-top: 20px;
+            z-index: 2; /* Ensure keyboard is above echo */
         }
         .keyboard-row {
             display: flex;
@@ -73,13 +79,28 @@
             margin-bottom: 20px;
             color: #555;
         }
+        .echo {
+            position: absolute;
+            font-size: 72px; /* Increased font size */
+            color: rgba(255, 255, 255, 0.7);
+            animation: fadeOut 4s forwards; /* Stay on screen for longer */
+            z-index: 1; /* Ensure echo is behind everything */
+        }
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="waitingMessage"></div>
         <h1>Explore</h1>
-        <input type="text" id="inputBox" placeholder="Type something...">
+        <input type="text" id="inputBox" placeholder="create away...">
         <div id="response"></div>
     </div>
     <div class="keyboard-container" id="keyboard"></div>
@@ -115,20 +136,23 @@
         const waitingMessage = document.getElementById('waitingMessage');
 
         window.onload = function() {
-            const randomNumber = generateRandomNumber(20000, 25000);
-            waitingMessage.innerText = `You are 1 out of ${randomNumber} waiting in line...`;
+            const randomNumber = generateRandomNumber(10000, 12000);
+            waitingMessage.innerText = `There are ${randomNumber} on this site, please be patient as there may be delayed loading times.`;
         };
 
         inputBox.addEventListener('input', function() {
             const input = this.value.trim().toLowerCase();
             if (input === "") {
                 responseDiv.innerText = ""; // Display blank output when nothing is typed
+            } else if (input === "ambivalence") {
+                responseDiv.innerText = "NExT"; // Specific output for "ambivalence"
             } else {
                 const hash = hashString(input);
                 const randomResponse = generateRandomStringFromHash(hash, 20); // Adjust the length as needed
                 responseDiv.innerText = randomResponse;
             }
             updateKeyboard(input);
+            echoInput(input);
         });
 
         function createKeyboard() {
@@ -174,6 +198,24 @@
                     keyDiv.classList.remove('active');
                 }
             });
+        }
+
+        function echoInput(input) {
+            if (input.length > 0) {
+                const echoDiv = document.createElement('div');
+                echoDiv.className = 'echo';
+                echoDiv.innerText = input[input.length - 1];
+                document.body.appendChild(echoDiv);
+
+                const x = Math.random() * window.innerWidth;
+                const y = Math.random() * window.innerHeight;
+                echoDiv.style.left = `${x}px`;
+                echoDiv.style.top = `${y}px`;
+
+                setTimeout(() => {
+                    echoDiv.remove();
+                }, 4000); // Remove after 4 seconds
+            }
         }
 
         createKeyboard();
